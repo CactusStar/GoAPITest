@@ -22,14 +22,21 @@ func getRequest(url string) map[string]interface{} {
 }
 
 func verifyGetRequest(url string, expectResult map[string]string) {
-	
+	response := getRequest(url)
+	for key, value := range expectResult {
+		
+		if _, ok := response[key]; ok {
+			// should add assert here
+			fmt.Println(value)
+		}
+	}
 }
 
 func postRequest() {
 
 }
 
-func str2map(cmd string)map[string]interface{}{
+func str2map(cmd string) map[string]interface{}{
     str := strings.Replace(string(cmd), "'", "\"", -1)
     str = strings.Replace(str, "\n", "", -1)
 
@@ -48,8 +55,29 @@ func str2map(cmd string)map[string]interface{}{
 
 
 func main(){
-	getRequest("https://api.github.com/users/forAPItest")
+	// getRequest("https://api.github.com/users/forAPItest")
 
-}
+	test_1 := map[string]string {
+		"aaa": "test1",
+		"bbb": "test2",
+	}
+
+	test_2 := map[string]string {
+		"aaa": "test4",
+		"ccc": "eee",
+	}
+
+	for key, value := range test_1 {
+		value1, ok := test_2[key]
+		if ok {
+			fmt.Println("exist")
+			fmt.Println(value1)
+		} else {
+			fmt.Println("not exist")
+			fmt.Println(value)
+		}
+			
+	}
+}	
 
 // 

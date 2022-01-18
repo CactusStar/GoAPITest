@@ -21,3 +21,5 @@
 
 # To do 2022/01/14
 1. read the document on testerhome for api testing. They are stored in the API_Test folder in the browser
+# To do 2022/01/19
+need a script to insert data to database
