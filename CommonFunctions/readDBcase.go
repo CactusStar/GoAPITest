@@ -33,7 +33,7 @@ func readCase() ([]string, []string) {
 		return nil, nil
 	}
 	user := new(testcase)
-    rows,_ := DB.Query("select Response, Method from cactus.testcase where Run=\"Yes\"")
+    rows, _ := DB.Query("select Response, Method from cactus.testcase where Run=\"Yes\"")
 
 	for rows.Next() {
 		if err := rows.Scan(&user.Response, &user.Method); err != nil{
