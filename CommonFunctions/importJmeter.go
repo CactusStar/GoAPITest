@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func main(){
+func reserve(){
 	fmt.Println("aaa")
 	var test []string
 	// test := []string{"followers": "abc", "following": "def"} {"followers": "sss", "following": "ttt"}
