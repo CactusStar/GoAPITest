@@ -10,7 +10,7 @@ import (
 )
 
 
-func getRequest(url string) map[string]interface{} {
+func getRequest(url string) (map[string]interface{}, *http.Response) {
 	resp, err := http.Get(url)
 	if err != nil {
 		panic(err)
@@ -18,7 +18,7 @@ func getRequest(url string) map[string]interface{} {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body) 
 	newbody := string(body)
-	return str2map(newbody)
+	return str2map(newbody), resp
 }
 
 func getheader(url string){
@@ -27,77 +27,93 @@ func getheader(url string){
 		panic(err)
 	}
 	defer resp.Body.Close()
-	fmt.Println(resp.StatusCode)
+	fmt.Println(resp.Header)
 }
 
-func verifyGetRequest(url string, erresponse string) {
-	var actualR string
-	response := getRequest(url)
-	keys, finalERresp := analyzeResponse(erresponse)
-	fmt.Println("step1")
-	for _, key := range keys{
-		var stringvalue string
-		value := response[key]
-		switch value.(type) {
-		case float64:
-			ft := value.(float64)
-			stringvalue = strconv.FormatFloat(ft, 'f', -1, 64)
-		case float32:
-			ft := value.(float32)
-			stringvalue = strconv.FormatFloat(float64(ft), 'f', -1, 64)
-		case int:
-			it := value.(int)
-			stringvalue = strconv.Itoa(it)
-		case uint:
-			it := value.(uint)
-			stringvalue = strconv.Itoa(int(it))
-		case int8:
-			it := value.(int8)
-			stringvalue = strconv.Itoa(int(it))
-		case uint8:
-			it := value.(uint8)
-			stringvalue = strconv.Itoa(int(it))
-		case int16:
-			it := value.(int16)
-			stringvalue = strconv.Itoa(int(it))
-		case uint16:
-			it := value.(uint16)
-			stringvalue = strconv.Itoa(int(it))
-		case int32:
-			it := value.(int32)
-			stringvalue = strconv.Itoa(int(it))
-		case uint32:
-			it := value.(uint32)
-			stringvalue = strconv.Itoa(int(it))
-		case int64:
-			it := value.(int64)
-			stringvalue = strconv.FormatInt(it, 10)
-		case uint64:
-			it := value.(uint64)
-			stringvalue = strconv.FormatUint(it, 10)
-		case string:
-			stringvalue = value.(string)
-		case []byte:
-			stringvalue = string(value.([]byte))
-		default:
-			newValue, _ := json.Marshal(value)
-			stringvalue = string(newValue)
+func postRequest() {
+	resp, err := http.Post()
+}
+func verifyRequest() {
+	
+	_, erresponses, urls := readCase()
+	for i, erresponse := range erresponses {
+		var actualR string
+		response, resp := getRequest(urls[i])
+		keys, finalERresp := analyzeResponse(erresponse)
+		for _, key := range keys{
+			var stringvalue string
+			value := response[key]
+			switch value.(type) {
+				case float64:
+					ft := value.(float64)
+					stringvalue = strconv.FormatFloat(ft, 'f', -1, 64)
+				case float32:
+					ft := value.(float32)
+					stringvalue = strconv.FormatFloat(float64(ft), 'f', -1, 64)
+				case int:
+					it := value.(int)
+					stringvalue = strconv.Itoa(it)
+				case uint:
+					it := value.(uint)
+					stringvalue = strconv.Itoa(int(it))
+				case int8:
+					it := value.(int8)
+					stringvalue = strconv.Itoa(int(it))
+				case uint8:
+					it := value.(uint8)
+					stringvalue = strconv.Itoa(int(it))
+				case int16:
+					it := value.(int16)
+					stringvalue = strconv.Itoa(int(it))
+				case uint16:
+					it := value.(uint16)
+					stringvalue = strconv.Itoa(int(it))
+				case int32:
+					it := value.(int32)
+					stringvalue = strconv.Itoa(int(it))
+				case uint32:
+					it := value.(uint32)
+					stringvalue = strconv.Itoa(int(it))
+				case int64:
+					it := value.(int64)
+					stringvalue = strconv.FormatInt(it, 10)
+				case uint64:
+					it := value.(uint64)
+					stringvalue = strconv.FormatUint(it, 10)
+				case string:
+					stringvalue = value.(string)
+				case []byte:
+					stringvalue = string(value.([]byte))
+				default:
+					newValue, _ := json.Marshal(value)
+					stringvalue = string(newValue)
+			}
+			if key == "Status" {
+				stringvalue = resp.Status
+			} else if key == "StatusCode" {
+				stringvalue = strconv.Itoa(resp.StatusCode)
+				fmt.Println("=-==statuscode====")
+				fmt.Println(stringvalue)
+			} else if key == "Proto" {
+				stringvalue = resp.Proto
+			} else if key == "ProtoMajor" {
+				stringvalue = strconv.Itoa(resp.ProtoMajor)
+			} else if key == "ProtoMinor" {
+				stringvalue = strconv.Itoa(resp.ProtoMinor)
+			}
+			actualR = actualR + key + ":" + stringvalue + ", "
 		}
-		fmt.Println("step2")
-		
-		fmt.Println("step3")
-		actualR = actualR + key + ":" + stringvalue + ", "
-		fmt.Println("step4")
+		if finalERresp == actualR {
+			fmt.Println("passed")
+		} else {
+			fmt.Println("===ER===")
+			fmt.Println(finalERresp)
+			fmt.Println("===AR===")
+			fmt.Println(actualR)
+			fmt.Println("failed")
+		}
 	}
-	if finalERresp == actualR {
-		fmt.Println("passed")
-	} else {
-		fmt.Println("==ER==")
-		fmt.Println(finalERresp)
-		fmt.Println("==AR==")
-		fmt.Println(actualR)
-		fmt.Println("failed")
-	}
+	
 }
 
 func str2map(cmd string) map[string]interface{}{
@@ -126,10 +142,8 @@ func analyzeResponse(erresp string) ([]string, string){
 			key = append(key, key_temp[0])
 		}
 	}
-	fmt.Println("===============key start===============")
 	fmt.Println(key)
 	fmt.Println(final_resp)
-	fmt.Println("===============key end===============")
 	return key, final_resp
 }
 // loop the method list and response list
@@ -152,7 +166,8 @@ func analyzeResponse(erresp string) ([]string, string){
 // }
 
 func main() {
-	verifyGetRequest("https://api.github.com/users/forAPItest", "{followers:0, following:0, }")
+	// verifyGetRequest()
+	getheader("https://api.github.com/users/forAPItest")
 }
 
 
